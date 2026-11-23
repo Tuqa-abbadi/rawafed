@@ -10,6 +10,7 @@ import Sky from './Sky'
 import { GoldenGrade, type GoldenGradeEffect } from '@/effects/GoldenGrade'
 import type { BloomEffect } from 'postprocessing'
 import SceneGrade from '@/scene/SceneGrade'
+import Warmups from '@/scene/Warmups'
 import Water from '@/scene/Water'
 import Skyline from '@/scene/Skyline'
 import SunGlitter from '@/scene/SunGlitter'
@@ -78,13 +79,13 @@ export default function Experience() {
   const phoneLite = useMemo(() => typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 820), [])
   // adaptive quality: PerformanceMonitor lowers the resolution when fps drops (and raises it back),
   // and switches to the lite effects chain if the machine keeps struggling
-  const [dpr, setDpr] = useState(phoneLite ? 1 : 1.5)
+  const [dpr, setDpr] = useState(phoneLite ? 1 : 1.25)
   const [fallback, setFallback] = useState(false)
   const lite = phoneLite || fallback
   return (
     <>
       <Canvas
-        shadows={phoneLite ? false : 'soft'}
+        shadows={phoneLite ? false : 'percentage'}
         dpr={dpr}
         camera={{ position: [0, 1.55, -147.5], fov: 64, near: 0.1, far: 4000 }}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
@@ -93,7 +94,12 @@ export default function Experience() {
         <PerformanceMonitor
           bounds={() => [45, 58]}
           flipflops={3}
-          onDecline={() => setDpr((d) => Math.max(1, +(d - 0.25).toFixed(2)))}
+          onDecline={() =>
+            setDpr((d) => {
+              if (d <= 1) setFallback(true) // already at the lowest resolution: drop bloom / MSAA too
+              return Math.max(1, +(d - 0.25).toFixed(2))
+            })
+          }
           onIncline={() => setDpr((d) => Math.min(phoneLite ? 1 : 1.5, +(d + 0.25).toFixed(2)))}
           onFallback={() => {
             setDpr(1)
@@ -112,6 +118,7 @@ export default function Experience() {
           <Walker />
         </Suspense>
         {/* streams in after the hero is up (own Suspense: does not hold the loader) */}
+        <Warmups />
         <MapWorld />
         <Interiors />
         <CameraRig />
@@ -124,7 +131,7 @@ export default function Experience() {
             <Vignette offset={0.32} darkness={0.28} />
           </EffectComposer>
         ) : (
-          <EffectComposer multisampling={4} frameBufferType={HalfFloatType}>
+          <EffectComposer multisampling={2} frameBufferType={HalfFloatType}>
             <Bloom ref={bloom} mipmapBlur luminanceThreshold={2.2} luminanceSmoothing={0.3} intensity={0.3} />
             <GoldenGrade ref={grade} exposure={0.48} />
             <Vignette offset={0.32} darkness={0.28} />

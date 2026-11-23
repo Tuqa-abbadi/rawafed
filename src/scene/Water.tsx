@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { store } from '@/lib/store'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js'
@@ -112,8 +113,31 @@ export default function Water({ lite = false }: { lite?: boolean }) {
     ;(water.material as THREE.Material).dispose()
   }, [water])
 
+  // The reflection re-renders the whole scene: full rate + full size only at eye level in the hero
+  // (where it is seen up close). From the air (map) and inside the rooms it is refreshed every 2nd /
+  // 3rd frame at half size — the water moves slowly, the difference is invisible, the GPU saving is large.
+  useEffect(() => {
+    const render = water.onBeforeRender.bind(water)
+    let frame = 0
+    water.onBeforeRender = (...args: Parameters<typeof water.onBeforeRender>) => {
+      frame++
+      const { phase, view } = store.get()
+      const every = phase === 'hero' || phase === 'loading' ? 1 : view === 'interior' ? 3 : 2
+      if (frame % every === 0) render(...args)
+    }
+    return () => {
+      water.onBeforeRender = render
+    }
+  }, [water])
+  const fullSize = useRef(true)
   useFrame((_, dt) => {
     ;(water.material as THREE.ShaderMaterial).uniforms.uTime.value += dt
+    const hero = store.get().phase === 'hero' || store.get().phase === 'loading'
+    if (hero !== fullSize.current) {
+      fullSize.current = hero
+      const w = lite ? 512 : 1024, h = lite ? 256 : 512
+      water.getRenderTarget().setSize(hero ? w : w / 2, hero ? h : h / 2)
+    }
   })
 
   return <primitive object={water} />

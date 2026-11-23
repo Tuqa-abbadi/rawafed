@@ -1,6 +1,7 @@
 'use client'
 
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import Stagger from '../Stagger'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
@@ -25,25 +26,27 @@ const ds = (mt: THREE.MeshStandardMaterial) => {
  * entrance through a warm fade. They sit far behind the map camera, out of every other view.
  */
 export default function Interiors() {
-  const mapReady = useStore((s) => s.mapReady)
-  if (!mapReady) return null // stream in after the map
-  return (
-    <Suspense fallback={null}>
-      <Sets />
-      <Ready />
-    </Suspense>
-  )
+  // built in the background once their textures are on the GPU (Warmups), one room at a time; they
+  // stand far off-screen, so nothing is drawn until a visit (or at the latest on reaching the map)
+  const onMap = useStore((s) => s.mapReady && (s.roomsWarm || (s.phase !== 'hero' && s.phase !== 'loading')))
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    if (onMap) setMounted(true) // stays mounted afterwards (going home keeps the rooms ready)
+  }, [onMap])
+  if (!mounted) return null
+  return <Sets />
 }
 
 /**
  * Loaded -> warm up: compile every shader and upload every texture of the sets in the background,
  * so the cut into a room never shows a half-drawn first frame (nav waits for interiorsWarm).
  */
-function Ready() {
+function Ready({ root }: { root: React.RefObject<THREE.Group | null> }) {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
   const camera = useThree((s) => s.camera)
   useEffect(() => {
+    if (root.current) setNoReflect(root.current) // all rooms are mounted by now (Stagger: Ready is last)
     store.set({ interiorsReady: true })
     prefetchAudio() // the hall's recitations, in the background
     let done = false
@@ -80,19 +83,22 @@ function Sets() {
   })
   return (
     <group ref={root}>
-      <group position={INTERIOR_ORIGIN.library}>
-        <LibraryHall />
-      </group>
-      <group position={INTERIOR_ORIGIN.learning}>
-        <Classroom />
-      </group>
-      <group position={INTERIOR_ORIGIN.community}>
-        <Majlis />
-      </group>
-      <group position={INTERIOR_ORIGIN.reciters}>
-        <ReciterHall />
-      </group>
       <InteriorLight />
+      <Stagger gap={1200}>
+        <group position={INTERIOR_ORIGIN.reciters}>
+          <ReciterHall />
+        </group>
+        <group position={INTERIOR_ORIGIN.library}>
+          <LibraryHall />
+        </group>
+        <group position={INTERIOR_ORIGIN.learning}>
+          <Classroom />
+        </group>
+        <group position={INTERIOR_ORIGIN.community}>
+          <Majlis />
+        </group>
+        <Ready root={root} />
+      </Stagger>
     </group>
   )
 }

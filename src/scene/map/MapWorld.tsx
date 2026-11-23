@@ -9,6 +9,7 @@ import Buildings from './Buildings'
 import Vegetation from './Vegetation'
 import Boats from './Boats'
 import Labels from './Labels'
+import Stagger from '../Stagger'
 
 function MapReady() {
   useEffect(() => {
@@ -32,17 +33,18 @@ function NoReflect({ children }: { children: ReactNode }) {
  */
 export default function MapWorld() {
   const phase = useStore((s) => s.phase)
-  const heroLate = useStore((s) => s.heroLate)
+  const mapWarm = useStore((s) => s.mapWarm)
   const [waited, setWaited] = useState(false)
   useEffect(() => {
     if (phase === 'loading') return
-    const t = setTimeout(() => setWaited(true), 4000)
+    const t = setTimeout(() => setWaited(true), 20000) // safety net on very slow connections
     return () => clearTimeout(t)
   }, [phase])
-  // deep links (?phase=map / ?at=) start on the map: no waiting
-  if (phase === 'loading' || (phase === 'hero' && !heroLate && !waited)) return null
+  // mount once its textures are already on the GPU (Warmups); deep links / skip go straight in
+  if (phase === 'loading' || (phase === 'hero' && !mapWarm && !waited)) return null
+  // one part at a time (spreads the GPU uploads while the visitor is still in the hero)
   return (
-    <Suspense fallback={null}>
+    <Stagger gap={500}>
       <Island />
       <Buildings />
       <NoReflect>
@@ -51,6 +53,6 @@ export default function MapWorld() {
       <Boats />
       <Labels />
       <MapReady />
-    </Suspense>
+    </Stagger>
   )
 }
