@@ -1,14 +1,15 @@
 import type { NextConfig } from 'next'
 
-const LONG_CACHE = [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
-
+/**
+ * Fully static site (no server / API routes): `npm run build` writes a plain `out/` folder that any
+ * static host serves (Vercel, Netlify, Cloudflare Pages). Long cache headers for the 3D / media
+ * assets are in public/_headers (Netlify, Cloudflare) and vercel.json (Vercel).
+ */
 const nextConfig: NextConfig = {
+  output: 'export',
+  images: { unoptimized: true },
   reactStrictMode: true,
   devIndicators: false, // no Next.js dev bubble
-  // static 3D / media assets: cache for a year (file names change when the content changes)
-  async headers() {
-    return ['/models/:path*', '/textures/:path*', '/audio/:path*', '/env/:path*'].map((source) => ({ source, headers: LONG_CACHE }))
-  },
 }
 
 export default nextConfig

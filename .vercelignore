@@ -14,3 +14,4 @@ node_modules/
 public/models/hi/
 public/models/courtyard_complex.glb
 public/models/rehal.glb
+out/

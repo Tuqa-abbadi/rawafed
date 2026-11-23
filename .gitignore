@@ -11,3 +11,8 @@ assets/
 refs/
 *.tsbuildinfo
 .vercel
+assets/
+refs/
+screens/
+build/
+out/

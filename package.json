@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "tsc --noEmit",
-    "screens": "node scripts/screens.mjs"
+    "start": "npx serve out",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
