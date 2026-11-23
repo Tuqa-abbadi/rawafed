@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { useProgress } from '@react-three/drei'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
+import { AdaptiveEvents, PerformanceMonitor, useProgress } from '@react-three/drei'
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing'
 import { HalfFloatType } from 'three'
 import HeroOverlay from './HeroOverlay'
@@ -47,6 +47,17 @@ function LoadLine() {
   return null
 }
 
+/** Stop rendering while the tab is hidden (no GPU work in the background). */
+function PauseWhenHidden() {
+  const setFrameloop = useThree((s) => s.setFrameloop)
+  useEffect(() => {
+    const on = () => setFrameloop(document.hidden ? 'never' : 'always')
+    document.addEventListener('visibilitychange', on)
+    return () => document.removeEventListener('visibilitychange', on)
+  }, [setFrameloop])
+  return null
+}
+
 function ReadyGate() {
   const { active, progress, total } = useProgress()
   useEffect(() => {
@@ -64,20 +75,37 @@ export default function Experience() {
   const grade = useRef<GoldenGradeEffect>(null)
   const bloom = useRef<BloomEffect>(null)
   // lite mode on phones / small touch screens: DPR 1, no shadows, no bloom, no MSAA, smaller reflections
-  const lite = useMemo(() => typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 820), [])
+  const phoneLite = useMemo(() => typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 820), [])
+  // adaptive quality: PerformanceMonitor lowers the resolution when fps drops (and raises it back),
+  // and switches to the lite effects chain if the machine keeps struggling
+  const [dpr, setDpr] = useState(phoneLite ? 1 : 1.5)
+  const [fallback, setFallback] = useState(false)
+  const lite = phoneLite || fallback
   return (
     <>
       <Canvas
-        shadows={lite ? false : 'soft'}
-        dpr={lite ? 1 : [1, 1.5]}
+        shadows={phoneLite ? false : 'soft'}
+        dpr={dpr}
         camera={{ position: [0, 1.55, -147.5], fov: 64, near: 0.1, far: 4000 }}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
       >
         <fog attach="fog" args={[FOG, 260, 2300]} />
+        <PerformanceMonitor
+          bounds={() => [45, 58]}
+          flipflops={3}
+          onDecline={() => setDpr((d) => Math.max(1, +(d - 0.25).toFixed(2)))}
+          onIncline={() => setDpr((d) => Math.min(phoneLite ? 1 : 1.5, +(d + 0.25).toFixed(2)))}
+          onFallback={() => {
+            setDpr(1)
+            setFallback(true)
+          }}
+        />
+        <AdaptiveEvents />
+        <PauseWhenHidden />
         <Suspense fallback={null}>
           <Sky />
           <Lights />
-          <Water lite={lite} />
+          <Water lite={phoneLite} />
           <SunGlitter />
           <Skyline />
           <HeroSet />

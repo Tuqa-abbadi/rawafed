@@ -81,6 +81,7 @@ export default function HeroOverlay() {
 
   // scroll-linked: the text and the hint fade out over the first few percent of the story
   useEffect(() => {
+    const flags = { skip: true, late: false }
     const tick = () => {
       const p = story.p
       if (textRef.current) {
@@ -106,8 +107,11 @@ export default function HeroOverlay() {
         sec2Ref.current.style.visibility = a > 0.01 ? 'visible' : 'hidden'
       }
       if (hintRef.current) hintRef.current.style.opacity = String(1 - gsap.utils.clamp(0, 1, (p - 0.002) / 0.02))
-      setShowSkip(p < 0.985)
-      setLate(p >= MAP_AT && !store.get().mapReady)
+      // React state only when a value actually flips (never per frame)
+      const skip = p < 0.985
+      if (skip !== flags.skip) setShowSkip((flags.skip = skip))
+      const lt = p >= MAP_AT && !store.get().mapReady
+      if (lt !== flags.late) setLate((flags.late = lt))
     }
     gsap.ticker.add(tick)
     return () => gsap.ticker.remove(tick)

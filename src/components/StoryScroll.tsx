@@ -11,6 +11,9 @@ import { DEBUG } from '@/lib/debug'
 gsap.registerPlugin(ScrollTrigger)
 
 /** The page's root Lenis (scroll story). nav.ts uses it to jump (skip, home). */
+/** light scrub: the story follows the scroll position with a short ease (wheel, trackpad, touch alike) */
+const scrub = { target: 0, tau: 0.16 }
+
 export const storyScroll = {
   lenis: null as Lenis | null,
   /** jump to a progress 0..1 (immediate) */
@@ -19,6 +22,7 @@ export const storyScroll = {
     if (!l) return
     l.scrollTo(p * l.limit, { immediate: true, force: true })
     story.p = p
+    scrub.target = p
     ScrollTrigger.update()
   },
 }
@@ -50,16 +54,29 @@ export default function StoryScroll() {
     window.scrollTo(0, 0)
     const q = new URLSearchParams(DEBUG ? window.location.search : '')
 
-    const lenis = new Lenis({ autoRaf: false, smoothWheel: true, lerp: 0.085, wheelMultiplier: 0.9 })
+    // smooth wheel (Lenis), native touch momentum; the scrub below evens out both
+    const lenis = new Lenis({ autoRaf: false, smoothWheel: true, lerp: 0.09, wheelMultiplier: 0.85, touchMultiplier: 1.2 })
     storyScroll.lenis = lenis
     lenis.on('scroll', ScrollTrigger.update)
-    const tick = (time: number) => lenis.raf(time * 1000)
+    let last = performance.now()
+    const tick = (time: number) => {
+      lenis.raf(time * 1000)
+      // scrub: story.p eases toward the scroll position (refs only, no React state)
+      const now = performance.now()
+      const dt = Math.min(0.1, (now - last) / 1000)
+      last = now
+      if (pinned === null && storyActive() && Math.abs(scrub.target - story.p) > 1e-5) {
+        story.p += (scrub.target - story.p) * (1 - Math.exp(-dt / scrub.tau))
+        if (Math.abs(scrub.target - story.p) < 2e-4) story.p = scrub.target
+        gate()
+      }
+    }
     gsap.ticker.add(tick)
 
     const pinned = q.get('story')
     // debug entry points that start on the map: hold the story at its end until the scroll is there
     let holdEnd = q.get('phase') === 'map' || q.has('at') || q.has('into')
-    if (holdEnd) story.p = 1
+    if (holdEnd) story.p = scrub.target = 1
     const st = ScrollTrigger.create({
       trigger: '.story-track',
       start: 'top top',
@@ -68,7 +85,7 @@ export default function StoryScroll() {
         if (holdEnd && self.progress < 0.99) return
         holdEnd = false
         if (!storyActive()) return // after the handoff the scroll never touches the camera
-        if (pinned === null) story.p = self.progress
+        if (pinned === null) scrub.target = self.progress
         gate()
       },
     })

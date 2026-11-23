@@ -82,7 +82,8 @@ export default function Lights({ shadows = true }: { shadows?: boolean }) {
       }
     }
     if (sun.current) {
-      sun.current.shadow.autoUpdate = phase !== 'map'
+      // the sun's shadow map is live only in the hero (the walker moves); frozen on the map and inside
+      sun.current.shadow.autoUpdate = phase === 'hero' || phase === 'loading'
       // the ±18 m sun-shadow box follows the walker along the colonnade (scroll story)
       if (phase === 'hero' || phase === 'loading') {
         target.position.copy(walkerAt(story.p).pos).add(new THREE.Vector3(0, 0, -3))

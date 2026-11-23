@@ -35,7 +35,7 @@ export default function SidePanel() {
     return () => {
       tw.kill()
     }
-  }, [open, rafid, view, lang])
+  }, [open, rafid, view]) // (not on a language switch: the panel just re-renders its text, no replayed slide-in)
 
   // Lenis smooth scrolling inside the panel only
   useEffect(() => {
