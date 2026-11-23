@@ -1,0 +1,121 @@
+{
+  "brand": "Rawafed — روافد",
+  "lang": {
+    "switch": "Change language"
+  },
+  "hero": {
+    "title": "From the springs of the Quran… to new horizons",
+    "sub": "A complete knowledge platform reviving the Quranic sciences in the spirit of our time",
+    "sec2Title": "One city, four tributaries of knowledge",
+    "sec2Sub": "Walk through the city and meet its buildings before you step inside",
+    "scroll": "Scroll down to enter the world of Rawafed",
+    "skip": "Skip to map",
+    "wait": "Preparing the city…",
+    "titleA": "From the springs of the Quran…",
+    "titleB": "to new horizons"
+  },
+  "nav": {
+    "label": "City navigation",
+    "home": "Home"
+  },
+  "panel": {
+    "eyebrow": "A tributary of the city",
+    "back": "Back to the city"
+  },
+  "rafids": {
+    "reciters": {
+      "name": "Reciters",
+      "line": "Voices of reciters across generations, in one hall",
+      "body": [
+        "The Reciters Hall is the heart of the city: a calm space to listen to masterful recitations and get to know the reciters and their schools.",
+        "Choose a reciter and a surah, and listen in a hall that opens onto the sea."
+      ],
+      "features": [
+        "Selected recitations by great reciters",
+        "Lives and schools of the reciters",
+        "Multiple riwayat and qira'at"
+      ],
+      "cta": "Enter the Reciters Hall"
+    },
+    "library": {
+      "name": "Library",
+      "line": "Books of tafsir and Quranic sciences at your fingertips",
+      "body": [
+        "A digital library gathering the major works of tafsir and Quranic sciences, organised by topic, surah and author.",
+        "Search the verses and go straight to what the commentators said."
+      ],
+      "features": [
+        "Major works of tafsir",
+        "Topical search across the verses",
+        "References in Quranic sciences"
+      ],
+      "cta": "Explore the library"
+    },
+    "learning": {
+      "name": "Learning",
+      "line": "Learning paths in tajweed, memorisation and reflection",
+      "body": [
+        "Interactive classes and step-by-step paths, from the rules of tajweed to mastering recitation and memorisation.",
+        "Short lessons, voice exercises and progress tracking, one step at a time."
+      ],
+      "features": [
+        "Tajweed path",
+        "Memorisation and revision plans",
+        "Lessons in reflection (tadabbur)"
+      ],
+      "cta": "Enter the classroom"
+    },
+    "community": {
+      "name": "Community",
+      "line": "Circles and gatherings that bring the people of the Quran together",
+      "body": [
+        "Gatherings for discussion and circles for recitation and study, where you meet teachers and students from everywhere.",
+        "Join a circle, take part in a gathering, or start your own."
+      ],
+      "features": [
+        "Recitation circles",
+        "Study gatherings",
+        "Meetings with teachers"
+      ],
+      "cta": "Join the majlis"
+    }
+  },
+  "hall": {
+    "title": "Reciters Hall",
+    "choose": "Choose a reciter",
+    "reciters": "Reciters",
+    "surahs": "Available surahs",
+    "riwaya": "Riwaya:",
+    "surah": "Surah",
+    "soon": "Coming soon",
+    "play": "Play",
+    "pause": "Pause",
+    "player": "Recitation player",
+    "seek": "Recitation position",
+    "back": "Back to the city"
+  },
+  "reciters": {
+    "old": {
+      "name": "First Reciter",
+      "line": "Calm delivery, long breath",
+      "riwaya": "Hafs from Asim",
+      "style": "Murattal",
+      "bio": "A master reciter of the first generation, known for his calm delivery and measured pauses.",
+      "credit": "Recited by Sheikh Mahmoud Khalil Al-Hussary"
+    },
+    "young": {
+      "name": "Second Reciter",
+      "line": "A moving voice, precise rules",
+      "riwaya": "Hafs from Asim",
+      "style": "Mujawwad",
+      "bio": "A young reciter who combines precise tajweed with a beautiful voice.",
+      "credit": "Recited by Sheikh Mishary Alafasy"
+    }
+  },
+  "surahs": {
+    "fatiha": "Al-Fatiha",
+    "baqarah": "Al-Baqarah",
+    "yasin": "Ya-Sin",
+    "mulk": "Al-Mulk"
+  }
+}

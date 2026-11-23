@@ -1,0 +1,13 @@
+.env
+node_modules/
+dist/
+screens/
+.next/
+next-env.d.ts
+test-results/
+build/
+# source art / references / generated working files: kept on disk, never committed or deployed
+assets/
+refs/
+*.tsbuildinfo
+.vercel

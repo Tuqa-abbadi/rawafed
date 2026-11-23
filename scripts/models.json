@@ -1,0 +1,45 @@
+{
+  "_doc": "Stage 2 model pipeline config. size = {dim: x|y|z|xy, m: metres} measured on the source AFTER trim, in Blender Z-up coords (x width, y depth, z height). trim = [xmin, xmax, ymin, ymax] in source units (bisect cuts). tris = triangle budget. tex = max texture px (gltf-transform). Budgets: CLAUDE.md (buildings 60k, towers 8k, props 5k, characters 20k); interiors 15k (not specified in CLAUDE.md); instanced building parts lower.",
+  "models": [
+    { "src": "buildings/reciters.glb",          "out": "reciters",          "tris": 60000, "size": { "dim": "xy", "m": 75 } },
+    { "src": "buildings/community.glb",         "out": "community",         "tris": 60000, "size": { "dim": "xy", "m": 45 } },
+    { "src": "buildings/library.glb",           "out": "library",           "tris": 60000, "size": { "dim": "xy", "m": 42 } },
+    { "src": "buildings/learning.glb",          "out": "learning",          "tris": 60000, "size": { "dim": "xy", "m": 48 }, "fix_normals": true },
+    { "src": "buildings/courtyard_complex.glb", "out": "courtyard_complex", "tris": 60000, "size": { "dim": "xy", "m": 62 }, "trim": [-0.74, 0.685, -0.625, 0.905] },
+    { "src": "buildings/domed_hall.glb",        "out": "domed_hall",        "tris": 40000, "size": { "dim": "xy", "m": 32 } },
+    { "src": "buildings/pavilion_small.glb",    "out": "pavilion_small",    "tris": 30000, "size": { "dim": "xy", "m": 26 } },
+    { "src": "buildings/gateway_interior.glb",  "out": "gateway_interior",  "tris": 60000, "size": { "dim": "z",  "m": 9 } },
+    { "src": "buildings/gateway_portal.glb",    "out": "gateway_portal",    "tris": 40000, "size": { "dim": "z",  "m": 10 } },
+    { "src": "buildings/arcade_bay.glb",        "out": "arcade_bay",        "tris": 25000, "size": { "dim": "z",  "m": 7.5 } },
+    { "src": "buildings/minaret.glb",           "out": "minaret",           "tris": 15000, "size": { "dim": "z",  "m": 38 } },
+    { "src": "buildings/bridge.glb",            "out": "bridge",            "tris": 15000, "size": { "dim": "x",  "m": 16 } },
+    { "src": "buildings/pergola.glb",           "out": "pergola",           "tris": 12000,  "size": { "dim": "z",  "m": 3.4 } },
+    { "src": "hall/hall_arch_wall.glb",         "out": "hall_arch_wall",    "tris": 40000, "size": { "dim": "z",  "m": 8 } },
+
+    { "src": "skyline/tower_supertall.glb",     "out": "tower_supertall",   "tris": 30000,  "size": { "dim": "z",  "m": 360 } },
+    { "src": "skyline/tower_twist.glb",         "out": "tower_twist",       "tris": 8000,  "size": { "dim": "z",  "m": 140 } },
+    { "src": "skyline/tower_slim.glb",          "out": "tower_slim",        "tris": 8000,  "size": { "dim": "z",  "m": 140 } },
+    { "src": "skyline/tower_stepped.glb",       "out": "tower_stepped",     "tris": 8000,  "size": { "dim": "z",  "m": 120 } },
+    { "src": "skyline/tower_twin.glb",          "out": "tower_twin",        "tris": 8000,  "size": { "dim": "z",  "m": 150 } },
+    { "src": "skyline/tower_residential.glb",   "out": "tower_residential", "tris": 8000,  "size": { "dim": "z",  "m": 90 } },
+
+    { "src": "sea/dhow.glb",                    "out": "dhow",              "tris": 5000,  "size": { "dim": "x",  "m": 16 } },
+    { "src": "sea/yacht.glb",                   "out": "yacht",             "tris": 5000,  "size": { "dim": "x",  "m": 22 } },
+
+    { "src": "props/palm.glb",                  "out": "palm",              "tris": 5000,  "size": { "dim": "z",  "m": 9 } },
+    { "src": "props/olive_tree.glb",            "out": "olive_tree",        "tris": 5000,  "size": { "dim": "z",  "m": 3.0 } },
+    { "src": "props/lantern.glb",               "out": "lantern",           "tris": 5000,  "size": { "dim": "z",  "m": 1.1 } },
+    { "src": "props/fountain.glb",              "out": "fountain",          "tris": 5000,  "size": { "dim": "z",  "m": 3.2 } },
+    { "src": "props/rehal.glb",                 "out": "rehal",             "tris": 20000, "size": { "dim": "z",  "m": 0.5 }, "_note": "close-up hero prop in the reciters hall; 5k smeared the Quran" },
+    { "src": "props/lantern.glb",               "out": "lantern_hi",        "tris": 40000, "size": { "dim": "z",  "m": 1.1 }, "_note": "close-up copies in the reciters hall only (2-4); paths use 'lantern' (5k)" },
+
+    { "src": "interiors/majlis.glb",            "out": "majlis",            "tris": 15000, "size": { "dim": "xy", "m": 6.5 } },
+    { "src": "interiors/bookshelf.glb",         "out": "bookshelf",         "tris": 15000, "size": { "dim": "z",  "m": 2.8 } },
+    { "src": "interiors/reading_desk.glb",      "out": "reading_desk",      "tris": 15000, "size": { "dim": "x",  "m": 1.7 } },
+    { "src": "interiors/class_desk.glb",        "out": "class_desk",        "tris": 15000, "size": { "dim": "x",  "m": 1.6 } },
+
+    { "src": "characters/reciter_old.glb",      "out": "reciter_old",       "tris": 20000, "size": { "dim": "z",  "m": 1.0 }, "tex": 2048 },
+    { "src": "characters/reciter_young.glb",    "out": "reciter_young",     "tris": 20000, "size": { "dim": "z",  "m": 1.0 }, "tex": 2048 },
+    { "src": "characters/walker_rigged.glb",    "out": "walker",            "rigged": true, "size": { "dim": "z",  "m": 1.8 } }
+  ]
+}

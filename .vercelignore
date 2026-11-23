@@ -1,0 +1,16 @@
+# never upload secrets or source art
+.env
+.env.*
+assets/
+refs/
+build/
+screens/
+test-results/
+scripts/
+meshy_generate.py
+node_modules/
+.next/
+# generated model files the app does not load (kept on disk, just not deployed)
+public/models/hi/
+public/models/courtyard_complex.glb
+public/models/rehal.glb
