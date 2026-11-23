@@ -6,6 +6,7 @@ import { store, useStore } from '@/lib/store'
 import { MAP_AT, S2, S3, heroIntro, story } from '@/lib/story'
 import { skipToMap } from '@/lib/nav'
 import { t, useLang } from '@/lib/i18n'
+import { DEBUG } from '@/lib/debug'
 
 /**
  * Landing text, one block per scroll section (video order): section 1 logo + title + one line
@@ -33,7 +34,7 @@ export default function HeroOverlay() {
   useEffect(() => {
     if (phase !== 'hero' || !root.current) return
     const q = gsap.utils.selector(root.current)
-    const debug = /[?&](story|phase|at|into)=/.test(window.location.search)
+    const debug = DEBUG && /[?&](story|phase|at|into)=/.test(window.location.search)
     const full = !heroIntro.played && !debug && story.p < 0.01
     heroIntro.played = true
     if (!full) heroIntro.k = 0
@@ -57,12 +58,12 @@ export default function HeroOverlay() {
         .to(logo, { y: 0, duration: DESCENT, ease: 'power3.out' }, 0)
         .fromTo(q('.hero__title'), { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 0.9)
         .fromTo(q('.hero__sub'), { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.2)
-        .fromTo(q('.scroll-hint, .skip-btn'), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, DESCENT)
+        .fromTo(q('.scroll-hint, .skip-btn'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power2.out' }, DESCENT)
     } else {
       tl.set(sky, { autoAlpha: 0 })
         .to(logo, { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power2.out' }, 0)
         .fromTo(q('.hero__title, .hero__sub'), { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.15, ease: 'power2.out' }, 0)
-        .fromTo(q('.scroll-hint, .skip-btn'), { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.3')
+        .fromTo(q('.scroll-hint, .skip-btn'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power2.out' }, '-=0.3')
     }
     // any click / wheel / touch / key skips the intro instantly
     const skip = () => {

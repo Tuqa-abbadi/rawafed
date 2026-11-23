@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import gsap from '@/lib/gsap'
 import { store } from '@/lib/store'
 import { MAP_AT, story } from '@/lib/story'
+import { DEBUG } from '@/lib/debug'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -47,7 +48,7 @@ export default function StoryScroll() {
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
     window.scrollTo(0, 0)
-    const q = new URLSearchParams(window.location.search)
+    const q = new URLSearchParams(DEBUG ? window.location.search : '')
 
     const lenis = new Lenis({ autoRaf: false, smoothWheel: true, lerp: 0.085, wheelMultiplier: 0.9 })
     storyScroll.lenis = lenis

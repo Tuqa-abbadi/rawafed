@@ -99,8 +99,11 @@ body {
     linear-gradient(180deg, #d99a6c 0%, #eab07c 30%, #f4c690 58%, #f8dbab 76%, #e9b07a 100%);
 }
 .intro-logo {
-  position: fixed; z-index: 22; left: 50%; top: clamp(16px, 3.5vh, 40px); pointer-events: none;
-  translate: -50% 0; transform: translateY(-70px); /* drops to 0 in the intro */
+  /* centred by layout (full-width flex row), not by a translate: GSAP animates only y, so the
+     horizontal centre can never drift (RTL or not) */
+  position: fixed; z-index: 22; left: 0; right: 0; top: clamp(16px, 3.5vh, 40px); pointer-events: none;
+  display: flex; justify-content: center; direction: ltr;
+  transform: translateY(-70px); /* drops to 0 in the intro */
   filter: drop-shadow(0 3px 10px rgba(30, 23, 18, 0.45)) drop-shadow(0 0 2px rgba(30, 23, 18, 0.3));
 }
 .intro-progress { position: fixed; z-index: 23; left: 0; right: 0; bottom: 0; height: 2px; pointer-events: none; transition: opacity 0.6s ease 0.2s; }
@@ -281,24 +284,25 @@ body {
 
 /* scroll story: hint + skip */
 .scroll-hint {
-  position: fixed; left: 50%; bottom: clamp(18px, 4vh, 36px); transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  /* compact pill, low, beside the walker (he stands at the bottom centre of the frame) */
+  position: fixed; left: 50%; bottom: 14px; transform: translateX(calc(-50% + clamp(150px, 17vw, 260px)));
+  display: flex; flex-direction: row; align-items: center; gap: 9px;
   font: 400 13px/1 var(--font-alexandria), system-ui, sans-serif; color: color-mix(in srgb, var(--ivory) 85%, transparent);
   text-shadow: 0 1px 10px rgba(30, 23, 18, 0.5);
 }
-.scroll-hint { padding: 12px 20px 14px; border-radius: 18px; background: rgba(30, 23, 18, 0.42); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(235, 197, 122, 0.22); }
-.scroll-hint span { font-size: 14px; font-weight: 300; word-spacing: 0.08em; color: var(--ivory); }
+.scroll-hint { padding: 7px 14px 7px 12px; border-radius: 999px; background: rgba(30, 23, 18, 0.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(235, 197, 122, 0.22); }
+.scroll-hint span { font-size: 12.5px; font-weight: 300; word-spacing: 0.06em; color: var(--ivory); white-space: nowrap; }
 /* down chevron: physical borders (never mirrored by RTL), rotated to point straight down */
-.scroll-hint b { display: block; width: 10px; height: 10px; margin-top: -2px; border-right: 1.5px solid var(--gold-light); border-bottom: 1.5px solid var(--gold-light); transform: rotate(45deg); animation: hint-arrow 1.8s ease-in-out infinite; }
+.scroll-hint b { display: block; flex: none; width: 7px; height: 7px; margin: -4px 1px 0; border-right: 1.5px solid var(--gold-light); border-bottom: 1.5px solid var(--gold-light); transform: rotate(45deg); animation: hint-arrow 1.8s ease-in-out infinite; }
 @keyframes hint-arrow { 0%, 100% { translate: 0 -3px; opacity: 0.45; } 50% { translate: 0 5px; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .scroll-hint b { animation: none; } }
-html[lang="en"] .scroll-hint span { letter-spacing: 0.14em; text-transform: uppercase; font-size: 11px; }
-.scroll-hint i { width: 20px; height: 32px; border-radius: 12px; border: 1.5px solid rgba(250, 245, 236, 0.75); position: relative; }
+html[lang="en"] .scroll-hint span { letter-spacing: 0.1em; text-transform: uppercase; font-size: 10.5px; }
+.scroll-hint i { flex: none; width: 14px; height: 22px; border-radius: 12px; border: 1.5px solid rgba(250, 245, 236, 0.75); position: relative; }
 .scroll-hint i::after {
-  content: ''; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px;
+  content: ''; position: absolute; left: 50%; top: 4px; width: 2px; height: 5px; margin-left: -1px; border-radius: 2px;
   background: var(--gold-light); animation: scroll-dot 1.8s ease-in-out infinite;
 }
-@keyframes scroll-dot { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(11px); opacity: 0; } 100% { opacity: 0; } }
+@keyframes scroll-dot { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(7px); opacity: 0; } 100% { opacity: 0; } }
 .skip-btn {
   position: fixed; inset-inline-end: 24px; bottom: clamp(18px, 4vh, 36px); pointer-events: auto; cursor: pointer;
   display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
@@ -394,8 +398,8 @@ html[lang="en"] .hero__sec2 .hero__sub { letter-spacing: 0.05em; }
 }
 html[dir="ltr"] .skip-btn svg, html[dir="ltr"] .side-panel .btn-ghost svg { transform: scaleX(-1); }
 @media (max-width: 640px) {
-  .scroll-hint { bottom: 78px; max-width: calc(100vw - 32px); padding: 10px 16px 12px; }
-  .scroll-hint span { text-align: center; line-height: 1.5; font-size: 13px; }
+  .scroll-hint { bottom: 64px; transform: translateX(-50%); max-width: calc(100vw - 32px); }
+  .scroll-hint span { white-space: normal; line-height: 1.4; font-size: 12px; }
   .skip-btn { padding: 9px 14px; font-size: 13.5px; }
   .hero__sec2 { padding: 20px 22px; }
 }

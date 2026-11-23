@@ -7,6 +7,7 @@ import { camCtl } from '@/lib/camera'
 import { INTERIOR_ORIGIN, INTERIOR_SHOT, RAFID_ORDER, entranceFor, pathInto } from '@/lib/views'
 import { mapCameraFor } from '@/lib/layout'
 import * as THREE from 'three'
+import { DEBUG } from '@/lib/debug'
 
 /**
  * Screenshot/debug entry points (no effect without query params):
@@ -18,6 +19,7 @@ export default function DebugGate() {
   const mapReady = useStore((s) => s.mapReady)
   const interiorsReady = useStore((s) => s.interiorsReady)
   useEffect(() => {
+    if (!DEBUG) return
     const q = new URLSearchParams(window.location.search)
     // ?into=<rafid>&t=0..1 pins a frame of the flight INTO a building
     const into = q.get('into') as RafidKey | null

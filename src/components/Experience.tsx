@@ -28,6 +28,7 @@ import DebugGate from './DebugGate'
 import StoryScroll from './StoryScroll'
 import HallUI from './HallUI'
 import { store, useStore } from '@/lib/store'
+import { DEBUG } from '@/lib/debug'
 
 /** Haze matching the horizon colour of the sky JPG near the sun side (video skyline is hazy peach). */
 const FOG = '#dcc1a1'
@@ -51,7 +52,7 @@ function ReadyGate() {
   useEffect(() => {
     if (!active && total > 0 && progress >= 100 && store.get().phase === 'loading') {
       // debug/screenshots: ?phase=map / ?at= start on the map; ?story=0..1 pins the landing story
-      const q = new URLSearchParams(window.location.search)
+      const q = new URLSearchParams(DEBUG ? window.location.search : '')
       const phase = q.get('phase') === 'map' || q.has('at') || q.has('into') ? 'map' : 'hero'
       store.set({ phase, ready: true })
     }

@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import ModelViewerClient from '@/components/dev/ModelViewerClient'
 
 /**
@@ -5,6 +6,7 @@ import ModelViewerClient from '@/components/dev/ModelViewerClient'
  * /models?m=<name>&az=<deg>&el=<deg>&fov=<deg>&dist=<k>&ty=<0..1>
  */
 export default function ModelsPage() {
+  if (process.env.NODE_ENV === 'production') notFound() // dev-only tool
   return (
     <main className="stage">
       <ModelViewerClient />
