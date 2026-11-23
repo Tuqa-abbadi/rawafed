@@ -95,8 +95,10 @@ export default function ReciterHall() {
 function useMarbleFloor() {
   const tex = useTexture(['/textures/marble_01_diff.webp', '/textures/marble_01_nor_gl.webp', '/textures/marble_01_arm.webp'])
   return useMemo(() => {
-    const [map, normalMap, arm] = tiled(tex, 3)
-    return new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap: arm, color: '#f6ead8', roughness: 0.35 })
+    const [map, normalMap] = tiled(tex, 3)
+    // calm matte-satin marble: fixed roughness, no metal, low env reflection, no emissive
+    // (the shiny roughness map caught the lights/sky and flashed as the hall appeared)
+    return new THREE.MeshStandardMaterial({ map, normalMap, color: '#f3e6d2', roughness: 0.45, metalness: 0, envMapIntensity: 0.35 })
   }, [tex])
 }
 

@@ -116,7 +116,7 @@ function InteriorLight() {
     // head) and a gentler ambient, so the white thobe / shemagh never blow out
     // hall: a soft warm key in front of and above the reciter's face (no top-down hot spot)
     if (o) l.position.set(o.x + (hall ? 0.8 : 0), hall ? 3.4 : 7.5, o.z + (hall ? 1.2 : 0))
-    l.intensity = o ? (hall ? 7 : 28) : 0
+    l.intensity = o ? (hall ? 5.5 : 28) : 0 // (hall slightly lower: the grade no longer darkens it)
     l.distance = hall ? 18 : 30
     if (hemi.current) hemi.current.intensity = o ? (hall ? 0.9 : 1.1) : 0
   })

@@ -195,15 +195,17 @@ body {
   box-shadow: 0 0 0 4px rgba(250, 245, 236, 0.25), 0 0 14px rgba(235, 197, 122, 0.8);
 }
 .map-label__card {
-  margin-bottom: 10px; padding: 10px 16px; width: max-content; max-width: 280px; white-space: normal; text-align: center;
+  /* opens BELOW the pill (never up under the top nav); kept inside the screen by Labels.tsx */
+  position: absolute; left: 50%; top: var(--card-top, 48px); margin-left: calc(var(--card-w, 0px) / -2);
+  padding: 10px 16px; width: max-content; max-width: min(280px, calc(100vw - 24px)); white-space: normal; text-align: center;
   font: 400 13.5px/1.6 var(--font-alexandria), system-ui, sans-serif; color: var(--ivory);
-  opacity: 0; transform: translateY(6px); transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0; transform: translateY(-6px); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; z-index: 1;
 }
 .map-label.is-hover .map-label__card { opacity: 1; transform: none; }
 
 /* top navigation bar (video) */
 .top-nav {
-  position: fixed; top: 14px; left: 50%; z-index: 40; transform: translate(-50%, -12px);
+  position: fixed; top: 14px; left: 50%; z-index: 60; /* above everything on the page */ transform: translate(-50%, -12px);
   display: flex; align-items: center; gap: 14px; padding: 6px 10px 6px 14px; border-radius: 999px;
   opacity: 0; visibility: hidden; transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
   max-width: calc(100vw - 32px);

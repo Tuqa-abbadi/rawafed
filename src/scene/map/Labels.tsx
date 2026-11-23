@@ -27,7 +27,8 @@ export default function Labels() {
   const on = phase === 'map' && !busy && introDone
   const pills = useRef<Partial<Record<RafidKey, HTMLButtonElement | null>>>({})
   const stems = useRef<Partial<Record<RafidKey, HTMLSpanElement | null>>>({})
-  useLabelLayout(pills, stems)
+  const cards = useRef<Partial<Record<RafidKey, HTMLDivElement | null>>>({})
+  useLabelLayout(pills, stems, cards)
   // drei <Html> also projects points behind the camera: drop the labels entirely inside interiors
   if (view === 'interior') return <Highlight />
 
@@ -36,7 +37,7 @@ export default function Labels() {
       {RAFID_ORDER.map((id) => (
         <Html key={id} position={LABEL_ANCHOR[id]} zIndexRange={[15, 10]} style={{ pointerEvents: 'none' }}>
           <div className={`map-label${on ? ' is-on' : ''}${hover === id ? ' is-hover' : ''}`}>
-            <div className="map-label__card glass" role="tooltip" id={`card-${id}`}>
+            <div className="map-label__card glass" role="tooltip" id={`card-${id}`} ref={(el) => void (cards.current[id] = el)}>
               {RAFIDS[id].line}
             </div>
             <button
@@ -76,6 +77,7 @@ export default function Labels() {
 function useLabelLayout(
   pills: React.RefObject<Partial<Record<RafidKey, HTMLButtonElement | null>>>,
   stems: React.RefObject<Partial<Record<RafidKey, HTMLSpanElement | null>>>,
+  cards: React.RefObject<Partial<Record<RafidKey, HTMLDivElement | null>>>,
 ) {
   const lift = useRef<Record<RafidKey, number>>({ reciters: 0, library: 0, learning: 0, community: 0 })
   const v = useMemo(() => new THREE.Vector3(), [])
@@ -87,6 +89,10 @@ function useLabelLayout(
       return { id, x: (v.x * 0.5 + 0.5) * size.width, y: (-v.y * 0.5 + 0.5) * size.height, w: pill?.offsetWidth ?? 0, h: pill?.offsetHeight ?? 0 }
     }).sort((a, b) => b.y - a.y)
     const placed: { x: number; w: number; top: number; bottom: number }[] = []
+    // nothing above the top nav's bottom edge + 16 px (canvas-relative)
+    const nav = document.querySelector('.top-nav')?.getBoundingClientRect()
+    const canvasTop = (document.querySelector('canvas')?.getBoundingClientRect().top ?? 0)
+    const minTop = nav && nav.height ? nav.bottom - canvasTop + 16 : 0
     const GAP = 6
     for (const it of items) {
       let extra = 0
@@ -97,8 +103,34 @@ function useLabelLayout(
         if (!hit) break
         extra += bottom - (hit.top - GAP)
       }
-      const bottom = it.y - 6 - base - extra
+      // clamp under the nav: shorten the stem first (min 6 px), then shift the whole pill down
+      let shift = 0
+      const top0 = it.y - 6 - base - extra - it.h
+      if (top0 < minTop) {
+        const room = base + extra - 6
+        const cut = Math.min(room, minTop - top0)
+        extra -= cut
+        shift = minTop - top0 - cut
+      }
+      const bottom = it.y - 6 - base - extra + shift
       placed.push({ x: it.x, w: it.w, top: bottom - it.h, bottom })
+      const pill = pills.current[it.id]
+      if (pill) pill.style.translate = shift > 0.5 ? `0 ${shift.toFixed(1)}px` : ''
+      // description card: just below the pill, kept inside the screen (8 px margins)
+      const card = cards.current[it.id]
+      if (card) {
+        const cw = card.offsetWidth, ch = card.offsetHeight
+        card.style.setProperty('--card-w', `${cw}px`)
+        card.style.setProperty('--card-top', `${(it.h + shift + 8).toFixed(1)}px`)
+        const left = it.x - cw / 2
+        let dx = 0
+        if (left < 8) dx = 8 - left
+        else if (left + cw > size.width - 8) dx = size.width - 8 - (left + cw)
+        // pill bottom on screen -> card bottom; if it would leave the screen, open above-left/right instead
+        const cardTop = bottom + 8
+        const dy = cardTop + ch > size.height - 8 ? size.height - 8 - (cardTop + ch) : 0
+        card.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`
+      }
       const cur = lift.current[it.id]
       lift.current[it.id] = cur + (extra - cur) * Math.min(1, dt * 10)
       const stem = stems.current[it.id]

@@ -10,7 +10,8 @@ import { store } from '@/lib/store'
 const HERO = { exposure: 0.5, bloom: 0.3, contrast: 1.12, skyWarm: 1 }
 const BASE = { exposure: 0.48, bloom: 0.3, contrast: 1.06, skyWarm: 0.6 }
 /** القرّاء hall: softer, lower exposure and almost no bloom (no hot spots on the white thobe) */
-const HALL = { exposure: 0.44, bloom: 0.08, contrast: 1.05, skyWarm: 0.6 }
+// same grade as the map: no exposure / bloom / tone-mapping change when entering the hall
+const HALL = BASE
 
 /**
  * Per-scene grade: the reciters hall gets a lower exposure and very little bloom. The switch

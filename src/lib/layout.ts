@@ -136,7 +136,7 @@ export const MAP_CAMERA = {
   // CLAUDE.md suggests ≈(0,112,46)->(0,0,-90); lower and further back so the whole island (all
   // four روافد) fits a 16:9 frame with the bay and skyline behind it (t012/t032 framing)
   position: new THREE.Vector3(0, 80, 92),
-  target: new THREE.Vector3(0, 0, -112),
+  target: new THREE.Vector3(0, 12, -112), // aimed a little high: the city sits lower, clear of the top nav
   tanHalfV: 0.36, // ~40° vertical fov
   minTanHalfH: 0.62, // portrait screens widen to keep the island in frame
 }
