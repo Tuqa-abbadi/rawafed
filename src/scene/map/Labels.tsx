@@ -25,6 +25,9 @@ export default function Labels() {
   const view = useStore((s) => s.view)
   useLang()
   const on = phase === 'map' && !busy && introDone
+  const pills = useRef<Partial<Record<RafidKey, HTMLButtonElement | null>>>({})
+  const stems = useRef<Partial<Record<RafidKey, HTMLSpanElement | null>>>({})
+  useLabelLayout(pills, stems)
   // drei <Html> also projects points behind the camera: drop the labels entirely inside interiors
   if (view === 'interior') return <Highlight />
 
@@ -39,6 +42,7 @@ export default function Labels() {
             <button
               type="button"
               className="map-label__pill glass is-pill"
+              ref={(el) => void (pills.current[id] = el)}
               tabIndex={on ? 0 : -1}
               aria-describedby={`card-${id}`}
               onPointerEnter={() => {
@@ -54,7 +58,7 @@ export default function Labels() {
               <RafidIcon name={RAFIDS[id].icon} />
               <span>{RAFIDS[id].name}</span>
             </button>
-            <span className="map-label__stem" aria-hidden="true" />
+            <span className="map-label__stem" aria-hidden="true" ref={(el) => void (stems.current[id] = el)} />
             <span className="map-label__dot" aria-hidden="true" />
           </div>
         </Html>
@@ -62,6 +66,45 @@ export default function Labels() {
       <Highlight />
     </>
   )
+}
+
+/**
+ * Simple collision avoidance (all screen sizes, mostly needed on phones): every frame the labels
+ * are placed from the lowest on screen upward; a label whose pill would overlap one already placed
+ * is lifted above it by lengthening its stem (the dot stays on its building). Eased, so no jitter.
+ */
+function useLabelLayout(
+  pills: React.RefObject<Partial<Record<RafidKey, HTMLButtonElement | null>>>,
+  stems: React.RefObject<Partial<Record<RafidKey, HTMLSpanElement | null>>>,
+) {
+  const lift = useRef<Record<RafidKey, number>>({ reciters: 0, library: 0, learning: 0, community: 0 })
+  const v = useMemo(() => new THREE.Vector3(), [])
+  useFrame(({ camera, size }, dt) => {
+    const base = size.width <= 640 ? 18 : 42 // stem length (px)
+    const items = RAFID_ORDER.map((id) => {
+      v.copy(LABEL_ANCHOR[id]).project(camera)
+      const pill = pills.current[id]
+      return { id, x: (v.x * 0.5 + 0.5) * size.width, y: (-v.y * 0.5 + 0.5) * size.height, w: pill?.offsetWidth ?? 0, h: pill?.offsetHeight ?? 0 }
+    }).sort((a, b) => b.y - a.y)
+    const placed: { x: number; w: number; top: number; bottom: number }[] = []
+    const GAP = 6
+    for (const it of items) {
+      let extra = 0
+      for (let pass = 0; pass < 4; pass++) {
+        const bottom = it.y - 6 - base - extra // pill bottom (dot ~6 px)
+        const top = bottom - it.h
+        const hit = placed.find((p) => Math.abs(p.x - it.x) < (p.w + it.w) / 2 + GAP && top < p.bottom + GAP && bottom > p.top - GAP)
+        if (!hit) break
+        extra += bottom - (hit.top - GAP)
+      }
+      const bottom = it.y - 6 - base - extra
+      placed.push({ x: it.x, w: it.w, top: bottom - it.h, bottom })
+      const cur = lift.current[it.id]
+      lift.current[it.id] = cur + (extra - cur) * Math.min(1, dt * 10)
+      const stem = stems.current[it.id]
+      if (stem) stem.style.height = `${(base + lift.current[it.id]).toFixed(1)}px`
+    }
+  })
 }
 
 /** Eases each building's gold lift toward 1 while hovered (label or building), 0 otherwise. */

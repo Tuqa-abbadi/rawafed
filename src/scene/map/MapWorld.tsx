@@ -37,7 +37,7 @@ export default function MapWorld() {
   const [waited, setWaited] = useState(false)
   useEffect(() => {
     if (phase === 'loading') return
-    const t = setTimeout(() => setWaited(true), 20000) // safety net on very slow connections
+    const t = setTimeout(() => setWaited(true), 30000) // safety net on very slow connections
     return () => clearTimeout(t)
   }, [phase])
   // mount once its textures are already on the GPU (Warmups); deep links / skip go straight in

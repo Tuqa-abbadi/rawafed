@@ -5,7 +5,9 @@ import Lenis from 'lenis'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import gsap from '@/lib/gsap'
 import { store } from '@/lib/store'
-import { MAP_AT, story } from '@/lib/story'
+import { MAP_AT, RISE_START, story } from '@/lib/story'
+
+const HOLD_AT = RISE_START - 0.002 // the walk's end, just before the camera turns to the city
 import { DEBUG } from '@/lib/debug'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -65,9 +67,14 @@ export default function StoryScroll() {
       const now = performance.now()
       const dt = Math.min(0.1, (now - last) / 1000)
       last = now
-      if (pinned === null && storyActive() && Math.abs(scrub.target - story.p) > 1e-5) {
-        story.p += (scrub.target - story.p) * (1 - Math.exp(-dt / scrub.tau))
-        if (Math.abs(scrub.target - story.p) < 2e-4) story.p = scrub.target
+      // the city must be fully there before the camera turns to it: hold at the end of the walk
+      // (thin gold progress line) until the map is ready, then the rise continues
+      const target = store.get().mapReady ? scrub.target : Math.min(scrub.target, HOLD_AT)
+      const held = !store.get().mapReady && storyActive() && scrub.target > HOLD_AT && story.p > HOLD_AT - 0.02
+      if (held !== store.get().held) store.set({ held })
+      if (pinned === null && storyActive() && Math.abs(target - story.p) > 1e-5) {
+        story.p += (target - story.p) * (1 - Math.exp(-dt / scrub.tau))
+        if (Math.abs(target - story.p) < 2e-4) story.p = target
         gate()
       }
     }

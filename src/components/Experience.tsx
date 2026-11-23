@@ -38,13 +38,15 @@ const FOG = '#dcc1a1'
 function LoadLine() {
   const { progress } = useProgress()
   const phase = useStore((s) => s.phase)
+  const held = useStore((s) => s.held)
   useEffect(() => {
     const el = document.getElementById('intro-progress')
     if (!el) return
     const bar = el.firstElementChild as HTMLElement | null
     if (bar) bar.style.transform = `scaleX(${Math.max(0.04, progress / 100)})`
-    el.classList.toggle('is-done', phase !== 'loading')
-  }, [progress, phase])
+    // first the hero, then (during the intro + walk) the city: hidden once the map is ready
+    el.classList.toggle('is-done', !(phase === 'loading' || held))
+  }, [progress, phase, held])
   return null
 }
 

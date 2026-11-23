@@ -18,7 +18,8 @@ const ROOM_URLS = ['bookshelf', 'reading_desk', 'lantern_hi', 'class_desk', 'maj
  * Interiors mount afterwards, so the hero and the map never freeze while they load.
  */
 export default function Warmups() {
-  const start = useStore((s) => s.phase !== 'loading' && (s.heroLate || s.phase !== 'hero'))
+  // right after the hero's own assets: the city loads during the intro and the walk
+  const start = useStore((s) => s.phase !== 'loading')
   const mapWarm = useStore((s) => s.mapWarm)
   if (!start) return null
   return (

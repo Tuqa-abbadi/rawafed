@@ -454,3 +454,27 @@ html[dir="ltr"] .skip-btn svg, html[dir="ltr"] .side-panel .btn-ghost svg { tran
   .reciter-tag { font-size: 12px; padding: 5px 10px; }
   .map-label__pill { font-size: 12.5px; padding: 5px 10px 5px 8px; }
 }
+
+/* map labels on phones: icon + short name, small; the tap area stays >= 40 px (invisible margin) */
+@media (max-width: 640px) {
+  .map-label__pill { position: relative; font-size: 12px; padding: 4px 10px 4px 6px; gap: 5px; }
+  .map-label__pill svg { padding: 3px; width: 12px; height: 12px; }
+  .map-label__pill::after { content: ''; position: absolute; inset: -8px -4px; }
+  .map-label__dot { width: 8px; height: 8px; margin-bottom: -4px; }
+}
+
+/* phones, hero: top row = AR | EN (left) + Skip (right); the logo sits BELOW it; text sized for mobile */
+@media (max-width: 640px) {
+  .hero { padding-top: 64px; }
+  .intro-logo { top: 64px; }
+  .intro-logo .brand-logo { --logo-w: 90px !important; }
+  .hero__logo-space { height: calc(90px * 754 / 624); }
+  .hero__title { font-size: 28px; line-height: 1.3; margin-top: 14px; }
+  .hero__sub { font-size: 15px; max-width: 32ch; }
+  .skip-btn { top: 12px; right: 12px; padding: 7px 11px; font-size: 12px; gap: 6px; }
+  .skip-btn svg { width: 13px; height: 13px; }
+}
+@media (max-width: 380px) {
+  .hero__title { font-size: 25px; }
+  .hero__sub { font-size: 14px; }
+}
