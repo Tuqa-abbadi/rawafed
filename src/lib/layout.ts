@@ -143,10 +143,11 @@ export const MAP_CAMERA = {
 
 /** Portrait screens: a steeper, higher view fills the tall frame with the island, not empty sea. */
 export const MAP_CAMERA_PORTRAIT = {
-  position: new THREE.Vector3(0, 175, 40),
-  target: new THREE.Vector3(0, 0, -100),
+  // phones: higher and wider, so the WHOLE island (all four روافد and the shore) fits like on desktop
+  position: new THREE.Vector3(0, 200, 35),
+  target: new THREE.Vector3(0, 0, -92),
   tanHalfV: 0.36,
-  minTanHalfH: 0.44, // crops only the shore palms at the sides
+  minTanHalfH: 0.5,
 }
 
 export function mapCameraFor(aspect: number) {

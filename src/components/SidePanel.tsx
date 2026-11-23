@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 import gsap from '@/lib/gsap'
 import { useStore } from '@/lib/store'
 import { RAFIDS } from '@/lib/views'
 import { backToMap } from '@/lib/nav'
 import { RafidIcon } from './RafidIcon'
+import PanelToggle, { startCollapsed } from './PanelToggle'
 import { t, useLang } from '@/lib/i18n'
 
 /**
@@ -20,6 +21,7 @@ export default function SidePanel() {
   const arrived = useStore((s) => s.arrived)
   const busy = useStore((s) => s.busy)
   const lang = useLang()
+  const [min, setMin] = useState(startCollapsed)
   // the reciters hall has its own UI (HallUI)
   const open = phase === 'building' && !!rafid && !!view && (view !== 'interior' || arrived) && !(rafid === 'reciters' && view === 'interior')
   const root = useRef<HTMLElement>(null)
@@ -47,13 +49,16 @@ export default function SidePanel() {
 
   const r = rafid ? RAFIDS[rafid] : null
   return (
-    <aside ref={root} className="side-panel glass" aria-hidden={!open} aria-label={r?.name} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <aside ref={root} className={`side-panel glass${min ? ' is-min' : ''}`} aria-hidden={!open} aria-label={r?.name} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       {r && (
         <div className="side-panel__scroll" ref={scroller}>
           <div className="side-panel__content" ref={content}>
-            <p className="side-panel__eyebrow">
-              <RafidIcon name={r.icon} /> {t('panel.eyebrow')}
-            </p>
+            <div className="panel-top">
+              <p className="side-panel__eyebrow">
+                <RafidIcon name={r.icon} /> {t('panel.eyebrow')}
+              </p>
+              <PanelToggle collapsed={min} onToggle={() => setMin((v) => !v)} />
+            </div>
             <h2 className="side-panel__title">{r.name}</h2>
             <p className="side-panel__line">{r.line}</p>
             {r.body.map((t, i) => (

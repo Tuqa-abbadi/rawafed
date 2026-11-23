@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from '@/lib/gsap'
 import { useStore } from '@/lib/store'
 import { RECITERS, SURAHS, hasAudio, player, useRecitation, type ReciterId } from '@/lib/recitation'
 import { t, useLang } from '@/lib/i18n'
 import { backToMap } from '@/lib/nav'
 import { RafidIcon } from './RafidIcon'
+import PanelToggle, { startCollapsed } from './PanelToggle'
 
 const fmt = (s: number) => {
   const m = Math.floor(s / 60), r = Math.floor(s % 60)
@@ -55,6 +56,7 @@ export default function HallUI() {
   const loading = useRecitation((s) => s.loading)
   const root = useRef<HTMLDivElement>(null)
   const lang = useLang()
+  const [min, setMin] = useState(startCollapsed)
 
   useEffect(() => {
     if (!root.current) return
@@ -84,10 +86,13 @@ export default function HallUI() {
     {/* soft dark dip that hides the reciter swap (under the hall UI) */}
     <div className="hall-dip" aria-hidden="true" />
     <div className="hall-ui" ref={root} aria-hidden={!open} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      <aside className="hall-panel glass" aria-label={t('hall.title')}>
-        <p className="side-panel__eyebrow">
-          <RafidIcon name="mic" /> {t('hall.title')}
-        </p>
+      <aside className={`hall-panel glass${min ? ' is-min' : ''}`} aria-label={t('hall.title')}>
+        <div className="panel-top">
+          <p className="side-panel__eyebrow">
+            <RafidIcon name="mic" /> {min ? RECITERS.find((x) => x.id === reciter)!.name : t('hall.title')}
+          </p>
+          <PanelToggle collapsed={min} onToggle={() => setMin((v) => !v)} />
+        </div>
         <h3 className="hall-panel__h">{t('hall.choose')}</h3>
         <div className="hall-panel__list" role="radiogroup" aria-label={t('hall.reciters')}>
           {RECITERS.map((x) => {

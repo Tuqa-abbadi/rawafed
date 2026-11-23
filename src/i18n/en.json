@@ -20,7 +20,9 @@
   },
   "panel": {
     "eyebrow": "A tributary of the city",
-    "back": "Back to the city"
+    "back": "Back to the city",
+    "hide": "Hide",
+    "show": "Show"
   },
   "rafids": {
     "reciters": {
