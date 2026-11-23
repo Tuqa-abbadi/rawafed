@@ -5,6 +5,7 @@ import { store, useStore } from '@/lib/store'
 import { BUILDINGS } from '@/lib/layout'
 import { FILLERS } from './map/zones'
 import GpuWarmup from './GpuWarmup'
+import { IS_PHONE } from '@/lib/texprep'
 
 const u = (n: string) => `/models/${n}.glb`
 /** everything the map mounts */
@@ -27,7 +28,7 @@ export default function Warmups() {
       <Suspense fallback={null}>
         <GpuWarmup urls={MAP_URLS} onDone={() => store.set({ mapWarm: true })} />
       </Suspense>
-      {mapWarm && (
+      {mapWarm && !IS_PHONE && (
         <Suspense fallback={null}>
           <GpuWarmup urls={ROOM_URLS} onDone={() => store.set({ roomsWarm: true })} />
         </Suspense>

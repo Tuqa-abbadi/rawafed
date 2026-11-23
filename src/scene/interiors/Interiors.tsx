@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Stagger from '../Stagger'
+import { IS_PHONE, prepTexture } from '@/lib/texprep'
+import type { RafidKey } from '@/lib/store'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
@@ -26,6 +28,31 @@ const ds = (mt: THREE.MeshStandardMaterial) => {
  * entrance through a warm fade. They sit far behind the map camera, out of every other view.
  */
 export default function Interiors() {
+  const phoneRoom = useStore((s) => (IS_PHONE && s.phase === 'building' ? s.rafid : null))
+  if (IS_PHONE) return phoneRoom ? <PhoneRoom key={phoneRoom} id={phoneRoom} /> : null
+  return <AllRooms />
+}
+
+/**
+ * Phones (tight memory, iOS closes the tab): only the room being visited exists — it loads during
+ * the flight to the door, and is released when you leave (the flight waits behind the dark fade).
+ */
+function PhoneRoom({ id }: { id: RafidKey }) {
+  const root = useRef<THREE.Group>(null)
+  const room =
+    id === 'reciters' ? <ReciterHall /> : id === 'library' ? <LibraryHall /> : id === 'learning' ? <Classroom /> : <Majlis />
+  return (
+    <group ref={root}>
+      <InteriorLight />
+      <Suspense fallback={null}>
+        <group position={INTERIOR_ORIGIN[id]}>{room}</group>
+        <Ready root={root} />
+      </Suspense>
+    </group>
+  )
+}
+
+function AllRooms() {
   // built in the background once their textures are on the GPU (Warmups), one room at a time; they
   // stand far off-screen, so nothing is drawn until a visit (or at the latest on reaching the map)
   const onMap = useStore((s) => s.mapReady && (s.roomsWarm || (s.phase !== 'hero' && s.phase !== 'loading')))
@@ -59,6 +86,7 @@ function Ready({ root }: { root: React.RefObject<THREE.Group | null> }) {
             for (const v of Object.values(mt as unknown as Record<string, unknown>))
               if (v instanceof THREE.Texture && !seen.has(v)) {
                 seen.add(v)
+                prepTexture(v, gl.capabilities.getMaxAnisotropy())
                 gl.initTexture(v)
               }
         })
@@ -71,6 +99,7 @@ function Ready({ root }: { root: React.RefObject<THREE.Group | null> }) {
     void warm()
     return () => {
       done = true
+      if (IS_PHONE) store.set({ interiorsReady: false, interiorsWarm: false }) // the room is released
     }
   }, [gl, scene, camera])
   return null

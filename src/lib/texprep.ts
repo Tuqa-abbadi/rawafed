@@ -3,6 +3,7 @@ import * as THREE from 'three'
 /** phones / small touch screens: GPU memory is tight */
 export const IS_PHONE = typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 820)
 const PHONE_MAX = 1024
+const scaled = new WeakMap<object, HTMLCanvasElement>()
 
 /**
  * Prepare a texture BEFORE its first GPU upload (never re-uploads): max anisotropy, and on phones
@@ -17,12 +18,21 @@ export function prepTexture(t: THREE.Texture, maxAniso: number) {
   const img = t.image as { width?: number; height?: number } | undefined
   if (!img || !img.width || !img.height || Math.max(img.width, img.height) <= PHONE_MAX) return
   if ((t as THREE.DataTexture).isDataTexture || (t as THREE.CompressedTexture).isCompressedTexture) return
-  const k = PHONE_MAX / Math.max(img.width, img.height)
-  const c = document.createElement('canvas')
-  c.width = Math.max(1, Math.round(img.width * k))
-  c.height = Math.max(1, Math.round(img.height * k))
+  // one scaled copy per source image (textures can share an image; the original is then freed by GC)
+  let c = scaled.get(img as object)
+  if (!c) {
+    const k = PHONE_MAX / Math.max(img.width, img.height)
+    c = document.createElement('canvas')
+    c.width = Math.max(1, Math.round(img.width * k))
+    c.height = Math.max(1, Math.round(img.height * k))
+    try {
+      c.getContext('2d')!.drawImage(img as CanvasImageSource, 0, 0, c.width, c.height)
+    } catch {
+      return // keep the original
+    }
+    scaled.set(img as object, c)
+  }
   try {
-    c.getContext('2d')!.drawImage(img as CanvasImageSource, 0, 0, c.width, c.height)
     t.image = c
     t.needsUpdate = true
   } catch {
