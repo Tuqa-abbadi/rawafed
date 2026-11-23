@@ -4,6 +4,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
+import { prepTexture } from '@/lib/texprep'
 
 /**
  * Downloads the next scene's models in the background and uploads their textures to the GPU a few
@@ -33,7 +34,9 @@ export default function GpuWarmup({ urls, onDone, budgetMs = 5 }: { urls: string
     // at least one texture per frame, more while the frame budget allows
     do {
       if (i.current >= queue.length) break
-      gl.initTexture(queue[i.current++])
+      const t = queue[i.current++]
+      prepTexture(t, gl.capabilities.getMaxAnisotropy())
+      gl.initTexture(t)
     } while (performance.now() - t0 < budgetMs)
     if (i.current >= queue.length) {
       done.current = true

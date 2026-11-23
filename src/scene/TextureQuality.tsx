@@ -3,6 +3,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { prepTexture } from '@/lib/texprep'
 
 const SLOTS = ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap', 'alphaMap'] as const
 
@@ -29,10 +30,7 @@ export default function TextureQuality() {
           const t = (m as unknown as Record<string, THREE.Texture | null | undefined>)[k]
           if (!t || done.has(t)) continue
           done.add(t)
-          if (t.anisotropy !== max) {
-            t.anisotropy = max
-            t.needsUpdate = true
-          }
+          prepTexture(t, max) // only before the first upload: never a second upload of the same texture
         }
       }
     })
