@@ -18,15 +18,25 @@ npm run dev        # development server: http://localhost:3000
 ## Build
 
 ```bash
-npm run build      # production build (also type-checks)
-npm start          # serve the production build: http://localhost:3000
+npm run build      # static export into out/ (no server needed)
+npx serve out      # preview the production build: http://localhost:3000
 ```
+
+Always judge smoothness on this production build. The dev server is much slower.
 
 ## Deploy
 
-The app deploys to Vercel as a standard Next.js project. Run `npx vercel` for a preview, or
-`npx vercel --prod` for production. `.vercelignore` keeps `.env`, `assets/`, `refs/` and other
-working files out of the upload.
+The build is a plain static folder (`out/`), so any static host works:
+
+- **Vercel:** run `npx vercel --prod`. `vercel.json` sets the build command, `out/` and cache headers.
+- **Netlify:** connect the repo. `netlify.toml` builds with `npm run build` and publishes `out`.
+- **Cloudflare Pages:** set the build command to `npm run build` and the output directory to `out`.
+
+Long-term cache headers for `/models`, `/textures`, `/audio` and `/env` come from
+`public/_headers` (Netlify, Cloudflare) and `vercel.json` (Vercel).
+
+`assets/` (the original Meshy models) and `refs/` stay on disk but are never committed or
+deployed.
 
 ## Adding recitations (audio)
 
