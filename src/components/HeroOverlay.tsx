@@ -3,10 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from '@/lib/gsap'
 import { store, useStore } from '@/lib/store'
-import { MAP_AT, S2, S3, heroIntro, story } from '@/lib/story'
+import { MAP_AT, S2, S3, story } from '@/lib/story'
 import { skipToMap } from '@/lib/nav'
 import { t, useLang } from '@/lib/i18n'
-import { DEBUG } from '@/lib/debug'
 
 /**
  * Landing text, one block per scroll section (video order): section 1 logo + title + one line
@@ -26,58 +25,21 @@ export default function HeroOverlay() {
   const [showSkip, setShowSkip] = useState(true)
 
   /**
-   * Opening intro (once, right after loading): the camera descends from high above the gateway
-   * into the arch (power3.out) while the logo moves down into place and fades in; then the title
-   * and the subtitle rise into place; the scroll hint comes last. Page scroll is locked meanwhile;
-   * a click, wheel, touch or key skips straight to the end. Later visits (الرئيسية) show it directly.
+   * No intro animation: the page opens on the final hero framing (the camera is already at rest
+   * inside the arch). When the scene is ready, the CSS sky over it and the text fade in together
+   * (0.35 s) — nothing moves or resizes until the visitor scrolls.
    */
+  const shown = useStore((s) => s.sceneShown)
   useEffect(() => {
-    if (phase !== 'hero' || !root.current) return
+    if (phase !== 'hero' || !shown || !root.current) return
     const q = gsap.utils.selector(root.current)
-    const debug = DEBUG && /[?&](story|phase|at|into)=/.test(window.location.search)
-    const full = !heroIntro.played && !debug && story.p < 0.01
-    heroIntro.played = true
-    if (!full) heroIntro.k = 0
-    const DESCENT = 2.5
-    const logo = document.getElementById('intro-logo')
-    const sky = document.getElementById('intro-sky')
-    const tl = gsap.timeline({
-      delay: full ? 0.05 : 0,
-      onComplete: () => {
-        heroIntro.k = 0
-        store.set({ heroIntro: false })
-      },
-    })
-    if (full) {
-      store.set({ heroIntro: true })
-      heroIntro.k = 1
-      // one continuous motion (~2.5 s, power3.out): the CSS sky dissolves into the 3D sky as the
-      // camera descends, the SAME logo element drops into place, then the title and subtitle rise
-      tl.to(heroIntro, { k: 0, duration: DESCENT, ease: 'power3.out' }, 0)
-        .to(sky, { autoAlpha: 0, duration: 0.9, ease: 'power1.out' }, 0)
-        .to(logo, { y: 0, duration: DESCENT, ease: 'power3.out' }, 0)
-        .fromTo(q('.hero__title'), { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 0.9)
-        .fromTo(q('.hero__sub'), { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.0, ease: 'power2.out' }, 1.2)
-        .fromTo(q('.scroll-hint, .skip-btn'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power2.out' }, DESCENT)
-    } else {
-      tl.set(sky, { autoAlpha: 0 })
-        .to(logo, { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power2.out' }, 0)
-        .fromTo(q('.hero__title, .hero__sub'), { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.15, ease: 'power2.out' }, 0)
-        .fromTo(q('.scroll-hint, .skip-btn'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: 'power2.out' }, '-=0.3')
-    }
-    // any click / wheel / touch / key skips the intro instantly
-    const skip = () => {
-      if (tl.isActive() || tl.progress() < 1) tl.progress(1)
-    }
-    const evs = ['pointerdown', 'wheel', 'touchstart', 'keydown'] as const
-    if (full) evs.forEach((e) => window.addEventListener(e, skip, { passive: true }))
+    const tw = gsap.timeline()
+    tw.to('#intro-sky', { autoAlpha: 0, duration: 0.35, ease: 'power1.out' }, 0)
+      .fromTo(q('.hero__title, .hero__sub, .scroll-hint, .skip-btn'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.35, ease: 'power1.out' }, 0)
     return () => {
-      evs.forEach((e) => window.removeEventListener(e, skip))
-      tl.kill()
-      heroIntro.k = 0
-      if (store.get().heroIntro) store.set({ heroIntro: false })
+      tw.kill()
     }
-  }, [phase])
+  }, [phase, shown])
 
   // scroll-linked: the text and the hint fade out over the first few percent of the story
   useEffect(() => {

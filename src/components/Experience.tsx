@@ -11,6 +11,7 @@ import { GoldenGrade, type GoldenGradeEffect } from '@/effects/GoldenGrade'
 import type { BloomEffect } from 'postprocessing'
 import SceneGrade from '@/scene/SceneGrade'
 import Warmups from '@/scene/Warmups'
+import FirstFrame from '@/scene/FirstFrame'
 import Water from '@/scene/Water'
 import Skyline from '@/scene/Skyline'
 import SunGlitter from '@/scene/SunGlitter'
@@ -44,7 +45,7 @@ function LoadLine() {
     if (!el) return
     const bar = el.firstElementChild as HTMLElement | null
     if (bar) bar.style.transform = `scaleX(${Math.max(0.04, progress / 100)})`
-    // first the hero, then (during the intro + walk) the city: hidden once the map is ready
+    // the hero while loading, then only if the walk has to wait for the city
     el.classList.toggle('is-done', !(phase === 'loading' || held))
   }, [progress, phase, held])
   return null
@@ -82,8 +83,9 @@ export default function Experience() {
   // adaptive quality: PerformanceMonitor lowers the resolution when fps drops (and raises it back),
   // and switches to the lite effects chain if the machine keeps struggling
   const [dpr, setDpr] = useState(phoneLite ? 1 : 1.25)
-  const [fallback, setFallback] = useState(false)
-  const lite = phoneLite || fallback
+  // effects never switch while the page is shown (bloom on/off would visibly change the look):
+  // only the resolution adapts; phones use the lite chain from the start
+  const lite = phoneLite
   return (
     <>
       <Canvas
@@ -96,17 +98,9 @@ export default function Experience() {
         <PerformanceMonitor
           bounds={() => [45, 58]}
           flipflops={3}
-          onDecline={() =>
-            setDpr((d) => {
-              if (d <= 1) setFallback(true) // already at the lowest resolution: drop bloom / MSAA too
-              return Math.max(1, +(d - 0.25).toFixed(2))
-            })
-          }
+          onDecline={() => setDpr((d) => Math.max(1, +(d - 0.25).toFixed(2)))}
           onIncline={() => setDpr((d) => Math.min(phoneLite ? 1 : 1.5, +(d + 0.25).toFixed(2)))}
-          onFallback={() => {
-            setDpr(1)
-            setFallback(true)
-          }}
+          onFallback={() => setDpr(1)}
         />
         <AdaptiveEvents />
         <PauseWhenHidden />
@@ -120,6 +114,7 @@ export default function Experience() {
           <Walker />
         </Suspense>
         {/* streams in after the hero is up (own Suspense: does not hold the loader) */}
+        <FirstFrame />
         <Warmups />
         <MapWorld />
         <Interiors />

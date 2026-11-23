@@ -12,13 +12,6 @@ import { HERO, HERO_TAN_HALF_V, LENS_SHIFT, HERO_MIN_TAN_HALF_H, mapCameraFor } 
  */
 export const story = { p: 0 }
 
-/**
- * Opening intro (once, after loading): the camera starts high above the gateway looking at the
- * sunset sky and descends into the hero framing. k = 1 at the top, 0 = the normal story camera.
- * Starts at 1 so the first frame after the loader is already the high shot (no jump).
- */
-export const heroIntro = { k: 1, played: false }
-const INTRO_RISE = 46 // m above the hero camera at the start
 
 
 /**
@@ -101,17 +94,7 @@ function follow(p: number) {
 /** Camera pose + lens for progress p (aspect picks the portrait/landscape map pose for the end). */
 export function storyCamera(p: number, aspect: number) {
   const lensIn = smooth(p, WALK_START, WALK_START + 0.1)
-  if (p < RISE_START) {
-    const f = follow(p)
-    const k = heroIntro.k
-    if (k > 0) {
-      // high above the gateway, looking out at the sunset sky; descends straight down into the arch
-      f.pos.y += INTRO_RISE * k
-      f.pos.z += 4 * k
-      f.look.y += INTRO_RISE * k * 1.08
-    }
-    return { ...f, lens: lerpLens(HERO_LENS, WALK_LENS, lensIn) }
-  }
+  if (p < RISE_START) return { ...follow(p), lens: lerpLens(HERO_LENS, WALK_LENS, lensIn) }
 
   // section 3: turn from the colonnade toward the CITY (the island, not the sea) and rise in an arc
   // around its west side, always looking at it, into the aerial map pose (which looks across the

@@ -1,6 +1,6 @@
 'use client'
 
-import type { RefObject } from 'react'
+import { useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { BloomEffect } from 'postprocessing'
 import type { GoldenGradeEffect } from '@/effects/GoldenGrade'
@@ -17,15 +17,19 @@ const HALL = { exposure: 0.44, bloom: 0.08, contrast: 1.05, skyWarm: 0.6 }
  * happens behind the entry/exit fade (instant), so it never shows as a lighting change.
  */
 export default function SceneGrade({ grade, bloom }: { grade: RefObject<GoldenGradeEffect | null>; bloom: RefObject<BloomEffect | null> }) {
+  const last = useRef<GoldenGradeEffect | null>(null)
   useFrame(() => {
     const { rafid, view, phase } = store.get()
     const p = rafid === 'reciters' && view === 'interior' ? HALL : phase === 'hero' || phase === 'loading' ? HERO : BASE
     const g = grade.current?.uniforms
     if (g) {
-      // eased (the hero -> map handoff is a continuous camera move; no visible switch)
+      // instant on load and whenever the effect is rebuilt (nothing drifts after the page shows);
+      // eased only across the hero -> map handoff, which is a continuous camera move anyway
+      const fresh = grade.current !== last.current
+      last.current = grade.current
       const ease = (k: string, v: number) => {
         const u = g.get(k)
-        if (u) u.value += (v - u.value) * 0.06
+        if (u) u.value = fresh || phase === 'loading' ? v : u.value + (v - u.value) * 0.06
       }
       const ex = g.get('exposure')
       if (ex) ex.value = p.exposure // instant: scene switches happen behind a fade

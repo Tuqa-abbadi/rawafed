@@ -22,10 +22,10 @@ type State = {
   /** map / interior textures are already on the GPU (GpuWarmup) */
   mapWarm: boolean
   roomsWarm: boolean
+  /** the hero has really been drawn (shaders compiled, frames at normal speed) */
+  sceneShown: boolean
   /** the walk is waiting at its end for the city to finish loading (progress line shows) */
   held: boolean
-  /** the opening intro (camera descent + logo/text reveal) is playing: page scroll is locked */
-  heroIntro: boolean
   /** the camera has finished moving into the interior: panels may open */
   arrived: boolean
   /** interior shaders compiled + first frame rendered (never reveal before this) */
@@ -41,7 +41,7 @@ type State = {
 }
 let state: State = {
   phase: 'loading', ready: false, mapReady: false,
-  rafid: null, hover: null, view: null, held: false, mapWarm: false, roomsWarm: false, heroLate: false, heroIntro: false, arrived: false, interiorsWarm: false, busy: false, interiorsReady: false, introDone: true, hi: {},
+  rafid: null, hover: null, view: null, sceneShown: false, held: false, mapWarm: false, roomsWarm: false, heroLate: false, arrived: false, interiorsWarm: false, busy: false, interiorsReady: false, introDone: true, hi: {},
 }
 const listeners = new Set<() => void>()
 

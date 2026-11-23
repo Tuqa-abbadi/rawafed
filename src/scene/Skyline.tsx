@@ -1,7 +1,6 @@
 'use client'
 
-import { Suspense, useLayoutEffect, useMemo, useRef } from 'react'
-import { useStore } from '@/lib/store'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { SEA_Y, SKYLINE, skylinePoint } from '@/lib/layout'
@@ -10,8 +9,7 @@ import { firstMesh } from '@/lib/materials'
 const FILLERS = ['tower_twist', 'tower_slim', 'tower_stepped', 'tower_twin', 'tower_residential'] as const
 const SUPERTALL = '/models/tower_supertall.glb'
 const FILLER_URLS = FILLERS.map((n) => `/models/${n}.glb`)
-// first view: only the landmark (procedural glass towers need no download); the Meshy back-row
-// fillers stream in once the hero shows (SkylineFillers)
+// the whole skyline (landmark + Meshy back row) is part of the first view
 
 /** Meshy materials: warm reflective glass picking up the sunset */
 function towerParts(scenes: THREE.Object3D[]) {
@@ -135,7 +133,6 @@ function useInstances(ref: React.RefObject<THREE.InstancedMesh | null>, list: In
  *  - the Meshy supertall as the landmark, right of centre
  */
 export default function Skyline() {
-  const late = useStore((s) => s.phase !== 'loading')
   const superGltf = useGLTF(SUPERTALL)
   const parts = useMemo(
     () =>
@@ -248,11 +245,8 @@ export default function Skyline() {
       {geoms.map((g, i) => (
         <instancedMesh key={`f${i}`} ref={frontRefs[i]} args={[g, glass, Math.max(1, front[i].length)]} count={front[i].length} frustumCulled={false} />
       ))}
-      {late && (
-        <Suspense fallback={null}>
-          <SkylineFillers back={back} />
-        </Suspense>
-      )}
+      {/* part of the first view: towers never pop in after the page shows */}
+      <SkylineFillers back={back} />
       <instancedMesh ref={domeRef} args={[domeGeom, undefined, domes.length]} frustumCulled={false}>
         <meshStandardMaterial color="#d9d3cb" roughness={0.6} metalness={0.1} />
       </instancedMesh>

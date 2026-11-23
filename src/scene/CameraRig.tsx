@@ -34,7 +34,9 @@ export default function CameraRig() {
   const applyLens = useMemo(
     () => (w: number, h: number, l: Lens) => {
       const key = `${w}x${h}:${l.shift.toFixed(4)}:${l.tanV.toFixed(4)}:${l.minTanH.toFixed(4)}`
-      if (key === applied.current) return
+      // re-apply if anything else touched the projection (R3F resets aspect on resize / DPR change)
+      const intact = camera.view?.enabled && camera.view.fullHeight === h * l.shift && Math.abs(camera.aspect - w / (h * l.shift)) < 1e-6
+      if (key === applied.current && intact) return
       applied.current = key
       const fullH = h * l.shift
       const fullAspect = w / fullH
@@ -52,6 +54,10 @@ export default function CameraRig() {
   useEffect(() => {
     applied.current = ''
   }, [size])
+  // this rig owns the projection (lens shift + fov): R3F must not reset the aspect on resize
+  useEffect(() => {
+    ;(camera as THREE.PerspectiveCamera & { manual?: boolean }).manual = true
+  }, [camera])
 
   // map: hold the aerial view unless navigation already holds a pose (returning from a building)
   useEffect(() => {

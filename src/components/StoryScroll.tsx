@@ -101,8 +101,8 @@ export default function StoryScroll() {
 
     // page scroll only during the story itself (locked while loading, on the map, in buildings)
     const sync = () => {
-      const { phase, ready, heroIntro } = store.get()
-      if (!ready || phase !== 'hero' || heroIntro || pinned !== null) lenis.stop()
+      const { phase, ready } = store.get()
+      if (!ready || phase !== 'hero' || pinned !== null) lenis.stop()
       else lenis.start()
       gate()
     }
